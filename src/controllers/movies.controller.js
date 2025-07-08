@@ -9,6 +9,16 @@ exports.getAllMovies = async (req, res, next) => {
   }
 };
 
+exports.getMovieById = async (req, res, next) => {
+  try {
+    const movie = await MoviesModel.getById(req.params.id);
+    if (!movie) return res.status(404).json({ message: 'Movie not found' });
+    res.json(movie);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.addMovie = async (req, res, next) => {
   try {
     const result = await MoviesModel.add(req.body);

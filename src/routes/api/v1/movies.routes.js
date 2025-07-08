@@ -4,6 +4,7 @@ const auth = require('../../../middleware/auth.middleware');
 const movieController = require('../../../controllers/movies.controller');
 
 router.get('/', auth, movieController.getAllMovies);
+router.get('/:id', auth, movieController.getMovieById);
 router.post('/', auth, movieController.addMovie);
 
 module.exports = router;

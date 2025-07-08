@@ -2,7 +2,7 @@ const { Movie, Actor } = require('../models');
 
 const MoviesModel = {
   async getAll() {
-    return await Movie.findAll({ include: Actor });
+    return await Movie.findAll({ include: Actor, order: [["title", "ASC"]] });
   },
 
   async add({ title, year, format, actors }) {
@@ -24,6 +24,11 @@ const MoviesModel = {
     }
 
     return await Movie.findByPk(movie.id, { include: Actor });
+  },
+
+  async getById(id) {
+    const movie = await Movie.findByPk(id, { include: Actor });
+    return movie;
   }
 };
 
