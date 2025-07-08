@@ -1,5 +1,6 @@
 const { Movie, Actor } = require('../models');
 const fs = require('fs/promises');
+const { Op } = require('sequelize');
 
 const MoviesModel = {
   async getAll({ sort, order, limit, offset }) {
@@ -47,6 +48,32 @@ const MoviesModel = {
     await movie.setActors([]); // delete dependencies many-to-many
     await movie.destroy();
     return true;
+  },
+
+  async search({ title, actor }) {
+    const where = {};
+    const actorWhere = {};
+    //OP is object to create more complex and flexible queries
+    if (title) {
+      where.title = { [Op.substring]: `%${title}%` }; 
+    }
+
+    if (actor) {
+      actorWhere[Op.or] = [
+        { firstName: { [Op.substring]: actor } },
+        { lastName: { [Op.substring]: actor } }
+      ];
+    }
+
+    const results = await Movie.findAll({
+      where,
+      include: {
+        model: Actor,
+        where: Object.keys(actorWhere).length ? actorWhere : undefined
+      }
+    });
+
+    return results;
   },
 
   async importFromFile(filePath) {

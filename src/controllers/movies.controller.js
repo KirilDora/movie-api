@@ -45,6 +45,16 @@ exports.deleteMovie = async (req, res, next) => {
   }
 };
 
+exports.searchMovies = async (req, res, next) => {
+  try {
+    const { title, actor } = req.query;
+    const results = await MoviesModel.search({ title, actor });
+    res.json(results);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.importFromTxt = async (req, res, next) => {
   try {
     const result = await MoviesModel.importFromFile(req.file.path);

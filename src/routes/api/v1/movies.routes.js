@@ -9,6 +9,7 @@ router.get('/', auth, movieController.getAllMovies);
 router.get('/:id', auth, movieController.getMovieById);
 router.post('/', auth, movieController.addMovie);
 router.delete('/:id', auth, movieController.deleteMovie);
+router.get('/search', auth, movieController.searchMovies);
 router.post('/import', auth, upload.single('file'), movieController.importFromTxt);
 
 module.exports = router;
