@@ -1,22 +1,19 @@
-const { Movie, Actor } = require('../models');
+const { MoviesModel } = require('../services/movies.service');
 
-exports.getAllMovies = async (req, res) => {
-  const movies = await Movie.findAll({ include: Actor });
-  res.json(movies);
+exports.getAllMovies = async (req, res, next) => {
+  try {
+    const movies = await MoviesModel.getAll();
+    res.json(movies);
+  } catch (error) {
+    next(error);
+  }
 };
 
-exports.addMovie = async (req, res) => {
-  const { title, year, format, actors } = req.body;
-
-  const movie = await Movie.create({ title, year, format });
-
-  if (Array.isArray(actors)) {
-    const actorInstances = await Promise.all(
-      actors.map(name => Actor.findOrCreate({ where: { name } }))
-    );
-    await movie.addActors(actorInstances.map(([actor]) => actor));
+exports.addMovie = async (req, res, next) => {
+  try {
+    const result = await MoviesModel.add(req.body);
+    res.status(201).json(result);
+  } catch (error) {
+    next(error);
   }
-
-  const fullMovie = await Movie.findByPk(movie.id, { include: Actor });
-  res.status(201).json(fullMovie);
 };
