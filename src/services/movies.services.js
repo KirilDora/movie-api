@@ -1,4 +1,5 @@
 const { Movie, Actor } = require('../models');
+const fs = require('fs/promises');
 
 const MoviesModel = {
   async getAll({ sort, order, limit, offset }) {
@@ -40,13 +41,69 @@ const MoviesModel = {
   },
 
   async deleteById(id) {
-  const movie = await Movie.findByPk(id);
-  if (!movie) return null;
+    const movie = await Movie.findByPk(id);
+    if (!movie) return null;
 
-  await movie.setActors([]); // delete dependencies many-to-many
-  await movie.destroy();
-  return true;
-}
+    await movie.setActors([]); // delete dependencies many-to-many
+    await movie.destroy();
+    return true;
+  },
+
+  async importFromFile(filePath) {
+    const content = await fs.readFile(filePath, 'utf-8');
+
+    const blocks = content.split('\n\n');
+    const imported = [];
+
+    for (const block of blocks) {
+      const lines = block.split('\n').filter(Boolean);
+
+      const movieData = {
+        title: '',
+        year: null,
+        format: '',
+        actors: []
+      };
+
+      for (const line of lines) {
+        const [key, ...rest] = line.split(':');
+        const value = rest.join(':').trim();
+
+        if (/^Title$/i.test(key)) movieData.title = value;
+        else if (/^Release Year$/i.test(key)) movieData.year = parseInt(value);
+        else if (/^Format$/i.test(key)) movieData.format = value;
+        else if (/^Stars$/i.test(key)) {
+          movieData.actors = value.split(',').map(fullName => {
+            const [firstName, ...lastParts] = fullName.trim().split(' ');
+            return { firstName, lastName: lastParts.join(' ') };
+          });
+        }
+      }
+
+      // check movie to be unique
+      const exists = await Movie.findOne({ where: { title: movieData.title } });
+      if (exists) continue;
+
+      // create movie instance
+      const movie = await Movie.create({
+        title: movieData.title,
+        year: movieData.year,
+        format: movieData.format
+      });
+
+      // add actors 
+      const actorInstances = await Promise.all(
+        movieData.actors.map(({ firstName, lastName }) =>
+          Actor.findOrCreate({ where: { firstName, lastName } })
+        )
+      );
+
+      await movie.addActors(actorInstances.map(([actor]) => actor));
+      imported.push(movieData.title);
+    }
+
+    return imported;
+  }
 };
 
 module.exports = { MoviesModel };

@@ -44,3 +44,12 @@ exports.deleteMovie = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.importFromTxt = async (req, res, next) => {
+  try {
+    const result = await MoviesModel.importFromFile(req.file.path);
+    res.json({ imported: result.length, movies: result });
+  } catch (error) {
+    next(error);
+  }
+};
