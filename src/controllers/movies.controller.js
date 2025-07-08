@@ -27,3 +27,13 @@ exports.addMovie = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.deleteMovie = async (req, res, next) => {
+  try {
+    const result = await MoviesModel.deleteById(req.params.id);
+    if (!result) return res.status(404).json({ message: 'Movie not found' });
+    res.json({ message: 'Movie deleted' });
+  } catch (error) {
+    next(error);
+  }
+};

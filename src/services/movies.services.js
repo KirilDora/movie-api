@@ -29,7 +29,16 @@ const MoviesModel = {
   async getById(id) {
     const movie = await Movie.findByPk(id, { include: Actor });
     return movie;
-  }
+  },
+
+  async deleteById(id) {
+  const movie = await Movie.findByPk(id);
+  if (!movie) return null;
+
+  await movie.setActors([]); // delete dependencies many-to-many
+  await movie.destroy();
+  return true;
+}
 };
 
 module.exports = { MoviesModel };
