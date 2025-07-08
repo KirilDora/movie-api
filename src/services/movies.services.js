@@ -1,8 +1,16 @@
 const { Movie, Actor } = require('../models');
 
 const MoviesModel = {
-  async getAll() {
-    return await Movie.findAll({ include: Actor, order: [["title", "ASC"]] });
+  async getAll({ sort, order, limit, offset }) {
+    const validFields = ['title', 'year', 'format'];
+  const sortField = validFields.includes(sort) ? sort : 'title';
+
+  return await Movie.findAll({
+    include: Actor,
+    order: [[sortField, order]],
+    limit,
+    offset
+  });
   },
 
   async add({ title, year, format, actors }) {
