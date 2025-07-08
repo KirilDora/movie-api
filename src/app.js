@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { sequelize } = require('./models');
 const movieRoutes = require('./routes/api/v1/movies.routes');
+const authRoutes = require('./routes/api/v1/auth.routes');
 const errorHandler = require('./utils/errorHandler');
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 app.use(errorHandler);
 
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/movies', movieRoutes);
 
 const PORT = process.env.APP_PORT || 3000;
