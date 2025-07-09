@@ -70,7 +70,7 @@ const MoviesService = {
     const actorWhere = {};
     //OP is object to create more complex and flexible queries
     if (title) {
-      where.title = { [Op.substring]: `%${title}%` }; 
+      where.title = { [Op.like]: `%${title}%` }; 
     }
 
     if (actor) {
@@ -94,7 +94,10 @@ const MoviesService = {
   async importFromFile(filePath) {
     const content = await fs.readFile(filePath, 'utf-8');
 
-    const blocks = content.split('\n\n');
+    const blocks = content
+                        .split(/\r?\n\s*\r?\n/)
+                        .map(block => block.trim())
+                        .filter(Boolean);
     const imported = [];
 
     for (const block of blocks) {
@@ -126,22 +129,34 @@ const MoviesService = {
       const exists = await Movie.findOne({ where: { title: movieData.title } });
       if (exists) continue;
 
-      // create movie instance
-      const movie = await Movie.create({
-        title: movieData.title,
-        year: movieData.year,
-        format: movieData.format
-      });
+      try {
+        if (!movieData.title || !movieData.year || !movieData.format || !movieData.actors?.length) {
+          console.warn('⚠️ Skipping invalid movie:', movieData);
+          continue;
+        }
 
-      // add actors 
-      const actorInstances = await Promise.all(
-        movieData.actors.map(({ firstName, lastName }) =>
-          Actor.findOrCreate({ where: { firstName, lastName } })
-        )
-      );
+        // create movie instance
+        const movie = await Movie.create({
+          title: movieData.title,
+          year: movieData.year,
+          format: movieData.format
+        });
 
-      await movie.addActors(actorInstances.map(([actor]) => actor));
-      imported.push(movieData.title);
+        // add actors 
+        const actorInstances = [];
+
+        for (const { firstName, lastName } of movieData.actors) {
+          const [actor] = await Actor.findOrCreate({ where: { firstName, lastName } });
+          actorInstances.push(actor);
+        }
+
+        await movie.addActors(actorInstances);
+        imported.push(movieData.title);
+      } catch(err) {
+        console.error('❌ Failed to insert movie:', movieData.title, '| Reason:', err.message);
+        continue;
+      }
+
     }
 
     return imported;

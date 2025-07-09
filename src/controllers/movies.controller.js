@@ -1,4 +1,4 @@
-const { MoviesService } = require('../services/movies.service');
+const { MoviesService } = require('../services/movies.services');
 
 exports.getAllMovies = async (req, res, next) => {
   try {
@@ -50,6 +50,10 @@ exports.searchMovies = async (req, res, next) => {
 
 exports.importFromTxt = async (req, res, next) => {
   try {
+    if (!req.file?.path) {
+      return res.status(400).json({ message: 'File not uploaded' });
+    }
+
     const result = await MoviesService.importFromFile(req.file.path);
     res.json({ imported: result.length, movies: result });
   } catch (error) {
