@@ -2,14 +2,7 @@ const { MoviesModel } = require('../services/movies.service');
 
 exports.getAllMovies = async (req, res, next) => {
   try {
-    const options = {
-      sort: req.query.sort || 'title',
-      order: req.query.order?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC',
-      limit: req.query.limit ? parseInt(req.query.limit) : undefined,
-      offset: req.query.offset ? parseInt(req.query.offset) : undefined
-    };
-
-    const movies = await MoviesModel.getAll(options);
+    const movies = await MoviesModel.getAll(req.query);
     res.json(movies);
   } catch (error) {
     next(error);

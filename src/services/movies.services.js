@@ -3,9 +3,10 @@ const fs = require('fs/promises');
 const { Op } = require('sequelize');
 
 const MoviesModel = {
-  async getAll({ sort, order, limit, offset }) {
+  async getAll(query) {
+    const { sort, order, limit, offset } = this.getOptions(query);
     const validFields = ['title', 'year', 'format'];
-  const sortField = validFields.includes(sort) ? sort : 'title';
+    const sortField = validFields.includes(sort) ? sort : 'title';
 
   return await Movie.findAll({
     include: Actor,
@@ -13,6 +14,20 @@ const MoviesModel = {
     limit,
     offset
   });
+  },
+
+  getOptions(query) {
+    const { sort = 'title', order = 'ASC', limit, offset } = query;
+
+    const validFields = ['title', 'year', 'format'];
+    const sortField = validFields.includes(sort) ? sort : 'title';
+
+    return {
+      sort: sortField,
+      order: order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC',
+      limit: limit ? parseInt(limit) : undefined,
+      offset: offset ? parseInt(offset) : undefined
+    };
   },
 
   async add({ title, year, format, actors }) {
