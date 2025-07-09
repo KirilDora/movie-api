@@ -4,29 +4,39 @@ const { Op } = require('sequelize');
 
 const MoviesService = {
   async getAll(query) {
-    const { sort, order, limit, offset } = this.getOptions(query);
-    const validFields = ['title', 'year', 'format'];
-    const sortField = validFields.includes(sort) ? sort : 'title';
+    const { order, movieWhere, actorWhere } = this.getOptions(query);
 
-  return await Movie.findAll({
-    include: Actor,
-    order: [[sortField, order]],
-    limit,
-    offset
-  });
+    return await Movie.findAll({
+      where: movieWhere,
+      include: {
+        model: Actor,
+        where: actorWhere
+      },
+      order: [['title', order]]
+    });
   },
 
   getOptions(query) {
-    const { sort = 'title', order = 'ASC', limit, offset } = query;
+    const { order = 'ASC', title, actor } = query;
 
-    const validFields = ['title', 'year', 'format'];
-    const sortField = validFields.includes(sort) ? sort : 'title';
+    const actorWhere = {};
+    const movieWhere = {};
+
+    if (title) {
+      movieWhere.title = { [Op.like]: `%${title}%` };
+    }
+
+    if (actor) {
+      actorWhere[Op.or] = [
+        { firstName: { [Op.like]: `%${actor}%` } },
+        { lastName: { [Op.like]: `%${actor}%` } }
+      ];
+    }
 
     return {
-      sort: sortField,
       order: order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC',
-      limit: limit ? parseInt(limit) : undefined,
-      offset: offset ? parseInt(offset) : undefined
+      movieWhere,
+      actorWhere: Object.keys(actorWhere).length > 0 ? actorWhere : undefined
     };
   },
 
@@ -63,32 +73,6 @@ const MoviesService = {
     await movie.setActors([]); // delete dependencies many-to-many
     await movie.destroy();
     return true;
-  },
-
-  async search({ title, actor }) {
-    const where = {};
-    const actorWhere = {};
-    //OP is object to create more complex and flexible queries
-    if (title) {
-      where.title = { [Op.like]: `%${title}%` }; 
-    }
-
-    if (actor) {
-      actorWhere[Op.or] = [
-        { firstName: { [Op.substring]: actor } },
-        { lastName: { [Op.substring]: actor } }
-      ];
-    }
-
-    const results = await Movie.findAll({
-      where,
-      include: {
-        model: Actor,
-        where: Object.keys(actorWhere).length ? actorWhere : undefined
-      }
-    });
-
-    return results;
   },
 
   async importFromFile(filePath) {
