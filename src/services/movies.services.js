@@ -2,7 +2,7 @@ const { Movie, Actor } = require('../models');
 const fs = require('fs/promises');
 const { Op } = require('sequelize');
 
-const MoviesModel = {
+const MoviesService = {
   async getAll(query) {
     const { sort, order, limit, offset } = this.getOptions(query);
     const validFields = ['title', 'year', 'format'];
@@ -148,4 +148,4 @@ const MoviesModel = {
   }
 };
 
-module.exports = { MoviesModel };
+module.exports = { MoviesService };
