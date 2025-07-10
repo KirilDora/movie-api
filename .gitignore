@@ -22,4 +22,10 @@ pids/
 .node_repl_history
 
 # Environment variables
-.env*
+.env
+
+#imported .txt files through web-interface
+uploads/
+
+#sqlite local db
+*.sqlite
