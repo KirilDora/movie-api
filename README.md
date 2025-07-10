@@ -91,14 +91,17 @@ Movies API — це RESTful сервіс для керування колекц�
     ```
 
 📄 API Роути
-Method Route Description
-POST /api/v1/auth/register Реєстрація користувача
-POST /api/v1/auth/login Авторизація
-GET /api/v1/movies Отримати всі фільми (пошук + сортування)
-POST /api/v1/movies Додати фільм
-GET /api/v1/movies/:id Отримати фільм за ID
-DELETE /api/v1/movies/:id Видалити фільм
-POST /api/v1/movies/import Імпорт фільмів з .txt (form-data)
+| Method | Route | Description
+
+|--------|-------|-------------
+
+| POST | /api/v1/auth/register | Реєстрація користувача
+| POST | /api/v1/auth/login | Авторизація
+| GET | /api/v1/movies | Отримати всі фільми (пошук + сортування)
+| POST | /api/v1/movies | Додати фільм
+| GET | /api/v1/movies/:id | Отримати фільм за ID
+| DELETE | /api/v1/movies/:id | Видалити фільм
+| POST | /api/v1/movies/import | Імпорт фільмів з .txt (form-data)
 
 📝 Формат .txt для імпорту
 
