@@ -57,17 +57,20 @@ Movies API — це RESTful сервіс для керування колекц�
 
    ```
 
+🐳 DockerHub: [kirildora/movies](https://hub.docker.com/r/kirildora/movies)
+
 🐳 Docker
 🔧 Збірка Docker-образу
 
     ```bash
-    docker build -t your_dockerhub_user/movies .
+    docker build -t kirildora/movies .
     ```
 
 🚀 Запуск через Docker
-`bash
-    docker run --name movies -p 8000:8050 -e APP_PORT=8050 your_dockerhub_user/movies
-    `
+
+    ```bash
+    docker run --name movies -p 8000:8050 -e APP_PORT=8050 kirildora/movies
+    ```
 
 Застосунок буде доступний за адресою:
 👉 http://localhost:8000
@@ -83,9 +86,10 @@ Movies API — це RESTful сервіс для керування колекц�
 `
 Додавай його до кожного захищеного запиту:
 
-`makefile
-Authorization: Bearer <your_token>
-`
+    ```
+    Authorization: Bearer <your_token>
+    ```
+
 📄 API Роути
 Method Route Description
 POST /api/v1/auth/register Реєстрація користувача
@@ -138,10 +142,9 @@ README.md
 
 🧼 .env.example
 
-````env
+    ```env
 
     APP_PORT=8000
     JWT_SECRET=supersecret
 
     ```
-````
